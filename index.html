@@ -127,19 +127,12 @@
     position:relative;
   }
   .bill{
-    background:linear-gradient(135deg,#dcb45f,var(--gold-dark));
+    background:var(--gold-dark);
     border-radius:12px;
     height:104px;
     position:relative;
     display:flex; align-items:center; justify-content:center;
-    box-shadow:0 10px 26px rgba(143,111,44,0.3);
     overflow:hidden;
-    border:2px solid var(--gold-dark);
-  }
-  .bill::before{
-    content:"";
-    position:absolute; inset:0;
-    background:repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 8px);
   }
   .bill-amount{
     font-family:'Frank Ruhl Libre', serif;
@@ -152,7 +145,7 @@
   .bill-decay{
     position:absolute; inset:0; left:auto;
     width:0%;
-    background:repeating-linear-gradient(135deg, rgba(178,58,58,0.88) 0 3px, rgba(178,58,58,0.68) 3px 6px);
+    background:rgba(178,58,58,0.88);
     border-radius:0 12px 12px 0;
     transition:width 0.6s ease;
   }
@@ -214,10 +207,11 @@
     background:var(--bone); border-radius:12px; padding:14px 10px; text-align:center;
   }
   .res-box.real{background:var(--blue-tint);}
+  .res-box.policy{background:var(--gold-tint); border:1.5px solid var(--gold);}
   .res-box .label{font-size:13px; color:var(--grey); font-weight:600; margin-bottom:5px;}
   .res-box .num{font-family:'Frank Ruhl Libre',serif; font-weight:700; font-size:21px;}
-  .res-box.nominal .num{color:var(--ink);}
   .res-box.real .num{color:var(--blue-dark);}
+  .res-box.policy .num{color:var(--gold-dark);}
 
   .loss-line{
     margin-top:16px;
@@ -333,9 +327,9 @@
 
 <main class="wrap">
 
-  <section class="calc-card" id="calcSection" aria-label="מחשבון אינפלציה מול תשואה">
-    <div class="calc-title"><span class="dot"></span> מחשבון: תשואה נומינלית מול תשואה ריאלית</div>
-    <p class="calc-desc">הזיזו את הסליידרים ותראו כמה באמת שווה הכסף שלכם אחרי אינפלציה.</p>
+  <section class="calc-card" id="calcSection" aria-label="מחשבון השוואת מס: תיקון 190 מול פוליסה פיננסית">
+    <div class="calc-title"><span class="dot"></span> מחשבון: הפטור של תיקון 190 מול פוליסה פיננסית</div>
+    <p class="calc-desc">משווה בין ההטבה של תיקון 190 במסלול הסולידי (מס של 15% על הרווח הנומינלי, בלי ניכוי אינפלציה) לבין החלופה — פוליסה פיננסית לא סולידית (מס של 25% על הרווח הריאלי, אחרי אינפלציה) — ורואים איזו שיטה משאירה לכם יותר כסף ביד, בערכים של היום.</p>
 
     <div class="field">
       <label for="amount">סכום שהופקד בתיקון 190 <span class="val" id="amountVal">₪100,000</span></label>
@@ -345,6 +339,11 @@
     <div class="field">
       <label for="ret">תשואה שנתית ממוצעת — מסלול סולידי <span class="val" id="retVal">2.5%</span></label>
       <input type="range" id="ret" min="0" max="10" step="0.1" value="2.5">
+    </div>
+
+    <div class="field">
+      <label for="policyRet">תשואה שנתית ממוצעת — פוליסה פיננסית (לא סולידי) <span class="val" id="policyRetVal">6.5%</span></label>
+      <input type="range" id="policyRet" min="3" max="70" step="0.5" value="6.5">
     </div>
 
     <div class="field">
@@ -358,19 +357,19 @@
     </div>
 
     <div class="calc-results">
-      <div class="res-box nominal">
-        <div class="label">ערך נומינלי (בדוח)</div>
-        <div class="num" id="nominalOut">₪128,000</div>
-      </div>
       <div class="res-box real">
-        <div class="label">ערך ריאלי (כוח קנייה)</div>
+        <div class="label">נטו בתיקון 190 (15% על רווח נומינלי)</div>
         <div class="num" id="realOut">₪91,000</div>
+      </div>
+      <div class="res-box policy">
+        <div class="label">נטו בפוליסה פיננסית (25% על רווח ריאלי)</div>
+        <div class="num" id="policyOut">₪128,000</div>
       </div>
     </div>
 
     <div class="loss-line">
-      השחיקה הריאלית על הכסף שלכם:
-      <span class="big" id="lossOut">-₪9,000</span>
+      <span id="lossLabel">ההפרש בערכי היום לטובת פוליסה פיננסית:</span>
+      <span class="big" id="lossOut">+₪9,000</span>
     </div>
   </section>
 
@@ -412,30 +411,52 @@
   function calc(){
     const amount = parseFloat($('amount').value);
     const ret = parseFloat($('ret').value) / 100;
+    const policyRet = parseFloat($('policyRet').value) / 100;
     const infl = parseFloat($('infl').value) / 100;
     const years = parseInt($('years').value);
 
     $('amountVal').textContent = fmt(amount);
     $('retVal').textContent = ret.toLocaleString('he-IL', {style:'percent', minimumFractionDigits:1}) ;
+    $('policyRetVal').textContent = policyRet.toLocaleString('he-IL', {style:'percent', minimumFractionDigits:1});
     $('inflVal').textContent = infl.toLocaleString('he-IL', {style:'percent', minimumFractionDigits:1});
     $('yearsVal').textContent = years;
 
-    const nominal = amount * Math.pow(1 + ret, years);
-    const real = nominal / Math.pow(1 + infl, years);
-    const loss = real - amount;
+    const inflationFactor = Math.pow(1 + infl, years);
 
-    $('nominalOut').textContent = fmt(nominal);
-    $('realOut').textContent = fmt(real);
-    $('lossOut').textContent = (loss >= 0 ? '+' : '-') + fmt(Math.abs(loss)).replace('₪','₪');
+    // תיקון 190 (מסלול סולידי): מס 15% על הרווח הנומינלי (בלי ניכוי אינפלציה), מוצג בערכי היום
+    const nominalValue = amount * Math.pow(1 + ret, years);
+    const realValueBeforeTax = nominalValue / inflationFactor;
+    const nominalGain = Math.max(0, nominalValue - amount);
+    const taxTikun190 = nominalGain * 0.15;
+    const netNominalTikun190 = nominalValue - taxTikun190;
+    const netRealTikun190 = netNominalTikun190 / inflationFactor;
+
+    // פוליסה פיננסית (לא סולידי): מס 25% על הרווח הריאלי (אחרי אינפלציה)
+    const policyNominalValue = amount * Math.pow(1 + policyRet, years);
+    const policyRealBeforeTax = policyNominalValue / inflationFactor;
+    const policyRealGain = Math.max(0, policyRealBeforeTax - amount);
+    const policyTax = policyRealGain * 0.25;
+    const netRealPolicy = policyRealBeforeTax - policyTax;
+
+    $('realOut').textContent = fmt(netRealTikun190);
+    $('policyOut').textContent = fmt(netRealPolicy);
+
+    const diff = netRealPolicy - netRealTikun190;
+    if (diff >= 0) {
+      $('lossLabel').textContent = 'ההפרש בערכי היום לטובת פוליסה פיננסית:';
+    } else {
+      $('lossLabel').textContent = 'ההפרש בערכי היום לטובת תיקון 190:';
+    }
+    $('lossOut').textContent = (diff >= 0 ? '+' : '-') + fmt(Math.abs(diff));
 
     $('billAmount').textContent = fmt(amount);
-    const decayFraction = Math.max(0, Math.min(1, (amount - real) / amount));
+    const decayFraction = Math.max(0, Math.min(1, (amount - realValueBeforeTax) / amount));
     const decayPct = Math.round(decayFraction * 100);
     $('billDecay').style.width = decayPct + '%';
     $('decayPct').textContent = 'שוחק ב-' + decayPct + '%';
   }
 
-  ['amount','ret','infl','years'].forEach(id => $(id).addEventListener('input', calc));
+  ['amount','ret','policyRet','infl','years'].forEach(id => $(id).addEventListener('input', calc));
   calc();
 
   const WEB3FORMS_KEY = "YOUR_ACCESS_KEY_HERE";

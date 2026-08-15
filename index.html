@@ -226,6 +226,52 @@
   }
   .loss-line .big{font-family:'Frank Ruhl Libre',serif; font-weight:900; font-size:25px; display:block; margin-top:4px;}
 
+  .growth-table-wrap{
+    margin-top:18px;
+    background:var(--bone);
+    border-radius:12px;
+    padding:16px 14px 14px;
+    border:1px solid var(--line);
+  }
+  .growth-table-title{
+    font-size:14.5px; font-weight:700; color:#4a453e; margin-bottom:2px; text-align:center;
+  }
+  .growth-table-note{
+    font-size:12px; color:var(--grey); text-align:center; margin-bottom:12px;
+  }
+  .table-scroll{
+    max-height:280px; overflow-y:auto; border-radius:10px; border:1px solid var(--line);
+  }
+  #growthTable{
+    width:100%; border-collapse:collapse; font-size:13.5px;
+  }
+  #growthTable thead th{
+    position:sticky; top:0; z-index:1;
+    background:var(--ink); color:#fff;
+    padding:9px 6px; font-weight:700; font-size:12.5px; text-align:center;
+  }
+  #growthTable tbody td{
+    padding:8px 6px; text-align:center; border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  #growthTable tbody tr:nth-child(even) td{background:var(--bone);}
+  #growthTable tbody tr.final-row td{
+    background:var(--gold-tint); font-weight:800; border-top:2px solid var(--gold);
+  }
+  #growthTable td.year-cell{font-weight:700; color:var(--grey);}
+  #growthTable td.tikun-cell{color:var(--blue-dark); font-weight:700;}
+  #growthTable td.policy-cell{color:var(--gold-dark); font-weight:700;}
+
+  .tax-summary{
+    margin-top:14px; display:flex; flex-direction:column; gap:8px;
+  }
+  .tax-row{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--warn-tint); border-radius:10px; padding:10px 13px;
+    font-size:13.5px; font-weight:600; color:var(--warn);
+  }
+  .tax-row span:last-child{font-family:'Frank Ruhl Libre',serif; font-weight:800; font-size:15px;}
+
   /* REASONS */
   .reasons{margin-top:38px;}
   .reasons h2{font-size:23px; text-align:center; margin-bottom:20px; font-weight:700;}
@@ -314,8 +360,8 @@
       <div class="bill-decay" id="billDecay"></div>
     </div>
     <div class="bill-caption">
-      <span>מה שהופקד</span>
-      <span id="decayPct">שוחק ב-0%</span>
+      <span id="billFromLabel">הופקד: ₪300,000</span>
+      <span id="decayPct">אחרי 10 שנים</span>
     </div>
   </div>
 
@@ -329,26 +375,21 @@
 
   <section class="calc-card" id="calcSection" aria-label="מחשבון השוואת מס: תיקון 190 מול פוליסה פיננסית">
     <div class="calc-title"><span class="dot"></span> מחשבון: הפטור של תיקון 190 מול פוליסה פיננסית</div>
-    <p class="calc-desc">משווה בין ההטבה של תיקון 190 במסלול הסולידי (מס של 15% על הרווח הנומינלי, בלי ניכוי אינפלציה) לבין החלופה — פוליסה פיננסית לא סולידית (מס של 25% על הרווח הריאלי, אחרי אינפלציה) — ורואים איזו שיטה משאירה לכם יותר כסף ביד, בערכים של היום.</p>
+    <p class="calc-desc">אותה תשואה, שני אופני מיסוי: תיקון 190 (15% על הרווח הנומינלי, בלי ניכוי אינפלציה) מול פוליסה פיננסית (המס מחושב על הרווח הריאלי, 25%) — ורואים כמה שקלים תחזיקו ביד בפועל בכל אחת מהאפשרויות.</p>
 
     <div class="field">
-      <label for="amount">סכום שהופקד בתיקון 190 <span class="val" id="amountVal">₪300,000</span></label>
+      <label for="amount">סכום שהופקד לחיסכון <span class="val" id="amountVal">₪300,000</span></label>
       <input type="range" id="amount" min="300000" max="1000000" step="5000" value="300000">
     </div>
 
     <div class="field">
-      <label for="ret">תשואה שנתית ממוצעת — מסלול סולידי <span class="val" id="retVal">2.5%</span></label>
-      <input type="range" id="ret" min="0" max="10" step="0.1" value="2.5">
+      <label for="ret">תשואה שנתית ממוצעת <span class="val" id="retVal">5.0%</span></label>
+      <input type="range" id="ret" min="0" max="20" step="0.1" value="5">
     </div>
 
     <div class="field">
-      <label for="policyRet">תשואה שנתית ממוצעת — פוליסה פיננסית (לא סולידי) <span class="val" id="policyRetVal">6.5%</span></label>
-      <input type="range" id="policyRet" min="3" max="70" step="0.5" value="6.5">
-    </div>
-
-    <div class="field">
-      <label for="infl">אינפלציה שנתית ממוצעת <span class="val" id="inflVal">3.5%</span></label>
-      <input type="range" id="infl" min="0" max="8" step="0.1" value="3.5">
+      <label for="infl">אינפלציה שנתית ממוצעת <span class="val" id="inflVal">1.5%</span></label>
+      <input type="range" id="infl" min="0" max="8" step="0.1" value="1.5">
     </div>
 
     <div class="field">
@@ -368,8 +409,34 @@
     </div>
 
     <div class="loss-line">
-      <span id="lossLabel">ההפרש בערכי היום לטובת פוליסה פיננסית:</span>
+      <span id="lossLabel">ההפרש בשקלים לטובת פוליסה פיננסית:</span>
       <span class="big" id="lossOut">+₪9,000</span>
+    </div>
+
+    <div class="growth-table-wrap">
+      <div class="growth-table-title">כך הכסף גדל שנה אחרי שנה (ריבית דריבית, ברוטו)</div>
+      <div class="growth-table-note">לפני מס — הניכוי מוצג למטה</div>
+      <div class="table-scroll">
+        <table id="growthTable">
+          <thead>
+            <tr>
+              <th>שנה</th>
+              <th>ערך מצטבר (ברוטו)</th>
+            </tr>
+          </thead>
+          <tbody id="growthTableBody"></tbody>
+        </table>
+      </div>
+      <div class="tax-summary">
+        <div class="tax-row">
+          <span>מס על הרווח בתיקון 190 (15% על נומינלי):</span>
+          <span id="taxTikunOut">-₪0</span>
+        </div>
+        <div class="tax-row">
+          <span>מס על הרווח בפוליסה פיננסית (25% על ריאלי):</span>
+          <span id="taxPolicyOut">-₪0</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -411,52 +478,79 @@
   function calc(){
     const amount = parseFloat($('amount').value);
     const ret = parseFloat($('ret').value) / 100;
-    const policyRet = parseFloat($('policyRet').value) / 100;
     const infl = parseFloat($('infl').value) / 100;
     const years = parseInt($('years').value);
 
     $('amountVal').textContent = fmt(amount);
     $('retVal').textContent = ret.toLocaleString('he-IL', {style:'percent', minimumFractionDigits:1}) ;
-    $('policyRetVal').textContent = policyRet.toLocaleString('he-IL', {style:'percent', minimumFractionDigits:1});
     $('inflVal').textContent = infl.toLocaleString('he-IL', {style:'percent', minimumFractionDigits:1});
     $('yearsVal').textContent = years;
 
     const inflationFactor = Math.pow(1 + infl, years);
-
-    // תיקון 190 (מסלול סולידי): מס 15% על הרווח הנומינלי (בלי ניכוי אינפלציה), מוצג בערכי היום
     const nominalValue = amount * Math.pow(1 + ret, years);
-    const realValueBeforeTax = nominalValue / inflationFactor;
+
+    // תיקון 190: מס 15% על הרווח הנומינלי (בלי שום ניכוי אינפלציה)
     const nominalGain = Math.max(0, nominalValue - amount);
     const taxTikun190 = nominalGain * 0.15;
-    const netNominalTikun190 = nominalValue - taxTikun190;
-    const netRealTikun190 = netNominalTikun190 / inflationFactor;
+    const netTikun190 = nominalValue - taxTikun190;
 
-    // פוליסה פיננסית (לא סולידי): מס 25% על הרווח הריאלי (אחרי אינפלציה)
-    const policyNominalValue = amount * Math.pow(1 + policyRet, years);
-    const policyRealBeforeTax = policyNominalValue / inflationFactor;
-    const policyRealGain = Math.max(0, policyRealBeforeTax - amount);
-    const policyTax = policyRealGain * 0.25;
-    const netRealPolicy = policyRealBeforeTax - policyTax;
+    // פוליסה פיננסית: המס מחושב על הרווח הריאלי (אחרי ניכוי אינפלציה), אבל מנוכה מהיתרה הנומינלית בפועל
+    const realValueBeforeTax = nominalValue / inflationFactor;
+    const realGain = Math.max(0, realValueBeforeTax - amount);
+    const taxPolicy = realGain * 0.25;
+    const netPolicy = nominalValue - taxPolicy;
 
-    $('realOut').textContent = fmt(netRealTikun190);
-    $('policyOut').textContent = fmt(netRealPolicy);
+    $('realOut').textContent = fmt(netTikun190);
+    $('policyOut').textContent = fmt(netPolicy);
 
-    const diff = netRealPolicy - netRealTikun190;
+    const diff = netPolicy - netTikun190;
     if (diff >= 0) {
-      $('lossLabel').textContent = 'ההפרש בערכי היום לטובת פוליסה פיננסית:';
+      $('lossLabel').textContent = 'ההפרש בשקלים לטובת פוליסה פיננסית:';
     } else {
-      $('lossLabel').textContent = 'ההפרש בערכי היום לטובת תיקון 190:';
+      $('lossLabel').textContent = 'ההפרש בשקלים לטובת תיקון 190:';
     }
     $('lossOut').textContent = (diff >= 0 ? '+' : '-') + fmt(Math.abs(diff));
 
-    $('billAmount').textContent = fmt(amount);
-    const decayFraction = Math.max(0, Math.min(1, (amount - realValueBeforeTax) / amount));
+    $('billAmount').textContent = fmt(nominalValue);
+    $('billFromLabel').textContent = 'הופקד: ' + fmt(amount);
+    const decayFraction = Math.max(0, Math.min(1, (nominalValue - netPolicy) / nominalValue));
     const decayPct = Math.round(decayFraction * 100);
     $('billDecay').style.width = decayPct + '%';
-    $('decayPct').textContent = 'שוחק ב-' + decayPct + '%';
+    $('decayPct').textContent = 'אחרי ' + years + ' שנים';
+
+    renderGrowthTable(amount, ret, infl, years);
   }
 
-  ['amount','ret','policyRet','infl','years'].forEach(id => $(id).addEventListener('input', calc));
+  function renderGrowthTable(amount, ret, infl, years){
+    const rows = [];
+    for (let y = 0; y <= years; y++){
+      rows.push({ y, val: amount * Math.pow(1 + ret, y) });
+    }
+
+    const tbody = $('growthTableBody');
+    tbody.innerHTML = rows.map(r => {
+      const isFinal = r.y === years;
+      return '<tr class="' + (isFinal ? 'final-row' : '') + '">' +
+        '<td class="year-cell">' + (r.y === 0 ? 'הפקדה' : 'שנה ' + r.y) + '</td>' +
+        '<td class="tikun-cell">' + fmt(r.val) + '</td>' +
+      '</tr>';
+    }).join('');
+
+    // מס על הרווח בסוף התקופה
+    const finalNominal = amount * Math.pow(1 + ret, years);
+    const nominalGain = Math.max(0, finalNominal - amount);
+    const taxTikun = nominalGain * 0.15;
+
+    const inflationFactor = Math.pow(1 + infl, years);
+    const realBeforeTax = finalNominal / inflationFactor;
+    const realGain = Math.max(0, realBeforeTax - amount);
+    const taxPolicy = realGain * 0.25;
+
+    $('taxTikunOut').textContent = '-' + fmt(taxTikun);
+    $('taxPolicyOut').textContent = '-' + fmt(taxPolicy);
+  }
+
+  ['amount','ret','infl','years'].forEach(id => $(id).addEventListener('input', calc));
   calc();
 
   const WEB3FORMS_KEY = "YOUR_ACCESS_KEY_HERE";

@@ -553,7 +553,7 @@
   ['amount','ret','infl','years'].forEach(id => $(id).addEventListener('input', calc));
   calc();
 
-  const WEB3FORMS_KEY = "YOUR_ACCESS_KEY_HERE";
+  const WEB3FORMS_KEY = "39139b67-9ccd-4244-adb5-e1fc67bc1d8a";
 
   $('contactForm').addEventListener('submit', async function(e){
     e.preventDefault();
@@ -587,7 +587,7 @@
       });
       const json = await res.json();
       if (json.success){
-        statusEl.textContent = 'תודה! הפרטים נשלחו, נציגנו יחזרו אליכם עד יום עסקים אחד.';
+        statusEl.textContent = 'תודה! קיבלנו את הפרטים שלכם, נחזור אליכם בהקדם עם הנתונים המדויקים שחישבנו עבורכם.';
         statusEl.className = 'form-status ok';
         e.target.reset();
         calc();

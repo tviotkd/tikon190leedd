@@ -611,6 +611,17 @@
         statusEl.textContent = 'תודה! קיבלנו את הפרטים שלכם, נחזור אליכם בהקדם עם הנתונים המדויקים שחישבנו עבורכם.';
         statusEl.className = 'form-status ok';
         if (window.fbq) { fbq('track', 'Lead'); }
+
+        // Webhook to Make.com
+        fetch('https://hook.eu1.make.com/q6dpr4sr34yy02kgwrnzszrwm442hy3o', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            source_id: 'cd22b01c-6ff2-43f5-95d7-bbdf194dabea',
+            name, phone, fund_amount: fundAmount
+          })
+        }).catch(err => console.error('Webhook error:', err));
+
         e.target.reset();
         calc();
       } else {

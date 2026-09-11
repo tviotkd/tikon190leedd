@@ -483,8 +483,7 @@
     <form id="contactForm">
       <div class="field-row"><input type="text" name="name" placeholder="שם מלא" required></div>
       <div class="field-row"><input type="tel" name="phone" placeholder="טלפון נייד" required pattern="[0-9\-+ ]{9,15}"></div>
-      <div class="field-row"><input type="text" name="fund_amount" placeholder="סכום משוער בתיקון 190 (לא חובה)"></div>
-      <button type="submit" class="cta-btn">רוצה לדעת כמה נשחק לי</button>
+      <button type="submit" class="cta-btn">🧮 הציגו לי את ההשוואה</button>
       <div class="form-status" id="formStatus"></div>
       <p class="disclaimer">הפרטים נשארים חסויים ומשמשים רק ליצירת קשר. ללא התחייבות.</p>
     </form>
@@ -583,7 +582,7 @@
     const data = new FormData(e.target);
     const name = data.get('name');
     const phone = data.get('phone');
-    const fundAmount = data.get('fund_amount') || 'לא צוין';
+    const fundAmount = fmt(parseFloat($('amount').value));
 
     if (WEB3FORMS_KEY === "YOUR_ACCESS_KEY_HERE") {
       const subject = encodeURIComponent('ליד חדש - מחולל תיקון 190');
@@ -611,17 +610,6 @@
         statusEl.textContent = 'תודה! קיבלנו את הפרטים שלכם, נחזור אליכם בהקדם עם הנתונים המדויקים שחישבנו עבורכם.';
         statusEl.className = 'form-status ok';
         if (window.fbq) { fbq('track', 'Lead'); }
-
-        // Webhook to Make.com
-        fetch('https://hook.eu1.make.com/q6dpr4sr34yy02kgwrnzszrwm442hy3o', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({
-            source_id: 'cd22b01c-6ff2-43f5-95d7-bbdf194dabea',
-            name, phone, fund_amount: fundAmount
-          })
-        }).catch(err => console.error('Webhook error:', err));
-
         e.target.reset();
         calc();
       } else {
@@ -632,7 +620,7 @@
       statusEl.className = 'form-status err';
     } finally {
       btn.disabled = false;
-      btn.textContent = 'רוצה לדעת כמה נשחק לי';
+      btn.textContent = '🧮 הציגו לי את ההשוואה';
     }
   });
 </script>

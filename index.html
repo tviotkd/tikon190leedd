@@ -482,7 +482,7 @@
     <p class="sub">השאירו פרטים ונחשב לכם, על בסיס הנתונים האמיתיים של הפוליסה — כמה כסף באמת עובד בשבילכם, וכמה נשחק.</p>
     <form id="contactForm">
       <div class="field-row"><input type="text" name="name" placeholder="שם מלא" required></div>
-      <div class="field-row"><input type="tel" name="phone" placeholder="טלפון נייד" required pattern="[0-9\-+ ]{9,15}"></div>
+      <div class="field-row"><input type="tel" name="phone" placeholder="טלפון נייד (10 ספרות)" required pattern="[0-9\-+ ]{9,15}" title="יש להזין מספר טלפון עם 10 ספרות"></div>
       <button type="submit" class="cta-btn">🧮 הציגו לי את ההשוואה</button>
       <div class="form-status" id="formStatus"></div>
       <p class="disclaimer">הפרטים נשארים חסויים ומשמשים רק ליצירת קשר. ללא התחייבות.</p>
@@ -494,6 +494,30 @@
 <script>
   const $ = id => document.getElementById(id);
   const fmt = n => '₪' + Math.round(n).toLocaleString('he-IL');
+
+  function getCookie(cname){
+    const match = document.cookie.match('(^|;)\\s*' + cname + '\\s*=\\s*([^;]+)');
+    return match ? decodeURIComponent(match[2]) : '';
+  }
+  function setCookie(cname, cvalue, days){
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = cname + '=' + encodeURIComponent(cvalue) + ';expires=' + d.toUTCString() + ';path=/';
+  }
+  function normalizeName(n){
+    return n.trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+  function hasAlreadySubmitted(normalizedName){
+    const sent = getCookie('kd_leads_sent');
+    if (!sent) return false;
+    return sent.split('|').includes(normalizedName);
+  }
+  function markAsSubmitted(normalizedName){
+    const sent = getCookie('kd_leads_sent');
+    const list = sent ? sent.split('|') : [];
+    if (!list.includes(normalizedName)) list.push(normalizedName);
+    setCookie('kd_leads_sent', list.join('|'), 90);
+  }
 
   function calc(){
     const amount = parseFloat($('amount').value);
@@ -584,6 +608,20 @@
     const phone = data.get('phone');
     const fundAmount = fmt(parseFloat($('amount').value));
 
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phoneDigits.length !== 10) {
+      statusEl.textContent = 'מספר הטלפון חייב להכיל בדיוק 10 ספרות (למשל 0501234567).';
+      statusEl.className = 'form-status err';
+      return;
+    }
+
+    const normalizedName = normalizeName(name);
+    if (hasAlreadySubmitted(normalizedName)) {
+      statusEl.textContent = 'כבר קיבלנו פנייה בשם הזה — נציגנו יחזרו אליכם בהקדם.';
+      statusEl.className = 'form-status ok';
+      return;
+    }
+
     if (WEB3FORMS_KEY === "YOUR_ACCESS_KEY_HERE") {
       const subject = encodeURIComponent('ליד חדש - מחולל תיקון 190');
       const body = encodeURIComponent(`שם: ${name}\nטלפון: ${phone}\nסכום משוער: ${fundAmount}`);
@@ -609,6 +647,7 @@
       if (json.success){
         statusEl.textContent = 'תודה! קיבלנו את הפרטים שלכם, נחזור אליכם בהקדם עם הנתונים המדויקים שחישבנו עבורכם.';
         statusEl.className = 'form-status ok';
+        markAsSubmitted(normalizedName);
         if (window.fbq) { fbq('track', 'Lead'); }
         e.target.reset();
         calc();

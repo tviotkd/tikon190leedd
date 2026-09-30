@@ -495,30 +495,6 @@
   const $ = id => document.getElementById(id);
   const fmt = n => '₪' + Math.round(n).toLocaleString('he-IL');
 
-  function getCookie(cname){
-    const match = document.cookie.match('(^|;)\\s*' + cname + '\\s*=\\s*([^;]+)');
-    return match ? decodeURIComponent(match[2]) : '';
-  }
-  function setCookie(cname, cvalue, days){
-    const d = new Date();
-    d.setTime(d.getTime() + (days*24*60*60*1000));
-    document.cookie = cname + '=' + encodeURIComponent(cvalue) + ';expires=' + d.toUTCString() + ';path=/';
-  }
-  function normalizeName(n){
-    return n.trim().toLowerCase().replace(/\s+/g, ' ');
-  }
-  function hasAlreadySubmitted(normalizedName){
-    const sent = getCookie('kd_leads_sent');
-    if (!sent) return false;
-    return sent.split('|').includes(normalizedName);
-  }
-  function markAsSubmitted(normalizedName){
-    const sent = getCookie('kd_leads_sent');
-    const list = sent ? sent.split('|') : [];
-    if (!list.includes(normalizedName)) list.push(normalizedName);
-    setCookie('kd_leads_sent', list.join('|'), 90);
-  }
-
   function calc(){
     const amount = parseFloat($('amount').value);
     const ret = parseFloat($('ret').value) / 100;
@@ -606,21 +582,7 @@
     const data = new FormData(e.target);
     const name = data.get('name');
     const phone = data.get('phone');
-    const fundAmount = fmt(parseFloat($('amount').value));
-
-    const phoneDigits = phone.replace(/\D/g, '');
-    if (phoneDigits.length !== 10) {
-      statusEl.textContent = 'מספר הטלפון חייב להכיל בדיוק 10 ספרות (למשל 0501234567).';
-      statusEl.className = 'form-status err';
-      return;
-    }
-
-    const normalizedName = normalizeName(name);
-    if (hasAlreadySubmitted(normalizedName)) {
-      statusEl.textContent = 'כבר קיבלנו פנייה בשם הזה — נציגנו יחזרו אליכם בהקדם.';
-      statusEl.className = 'form-status ok';
-      return;
-    }
+    const fundAmount = data.get('fund_amount') || 'לא צוין';
 
     if (WEB3FORMS_KEY === "YOUR_ACCESS_KEY_HERE") {
       const subject = encodeURIComponent('ליד חדש - מחולל תיקון 190');
@@ -633,22 +595,29 @@
 
     btn.disabled = true;
     btn.textContent = 'שולח...';
+
     try{
       const res = await fetch('https://hook.eu1.make.com/q6dpr4sr34yy02kgwrnzszrwm442hy3o', {
         method: 'POST',
-        headers: {'Content-Type':'application/json', Accept:'application/json'},
+        headers: {
+          'Content-Type':'application/json',
+          Accept:'application/json'
+        },
         body: JSON.stringify({
           access_key: WEB3FORMS_KEY,
           subject: 'ליד חדש - מחולל תיקון 190',
-          name, phone, fund_amount: fundAmount
+          name,
+          phone,
+          fund_amount: fundAmount,
+          source_id: 'cd22b01c-6ff2-43f5-95d7-bbdf194dabea'
         })
       });
+
       const json = await res.json();
+
       if (json.success){
         statusEl.textContent = 'תודה! קיבלנו את הפרטים שלכם, נחזור אליכם בהקדם עם הנתונים המדויקים שחישבנו עבורכם.';
         statusEl.className = 'form-status ok';
-        markAsSubmitted(normalizedName);
-        if (window.fbq) { fbq('track', 'Lead'); }
         e.target.reset();
         calc();
       } else {
@@ -659,7 +628,7 @@
       statusEl.className = 'form-status err';
     } finally {
       btn.disabled = false;
-      btn.textContent = '🧮 הציגו לי את ההשוואה';
+      btn.textContent = 'רוצה לדעת כמה נשחק לי';
     }
   });
 </script>

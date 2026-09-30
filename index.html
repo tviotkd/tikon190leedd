@@ -615,11 +615,14 @@
 
       const json = await res.json();
 
-      if (json.success){
-        statusEl.textContent = 'תודה! קיבלנו את הפרטים שלכם, נחזור אליכם בהקדם עם הנתונים המדויקים שחישבנו עבורכם.';
-        statusEl.className = 'form-status ok';
-        e.target.reset();
-        calc();
+     if (!res.ok) {
+  throw new Error('send failed');
+}
+
+statusEl.textContent = 'תודה! קיבלנו את הפרטים שלכם, נחזור אליכם בהקדם עם הנתונים המדויקים שחישבנו עבורכם.';
+statusEl.className = 'form-status ok';
+e.target.reset();
+calc();
       } else {
         throw new Error('send failed');
       }
